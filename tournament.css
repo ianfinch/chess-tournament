@@ -1,0 +1,26 @@
+table#league {
+    border-collapse: collapse;
+}
+
+table#league th {
+    background: burlywood;
+    padding: 0.3em 0.5em;
+}
+
+table#league tr:nth-child(odd) {
+    background: cornsilk;
+}
+
+table#league tr:nth-child(even) {
+    background: bisque;
+}
+
+table#league td {
+    text-align: right;
+    padding: 0.3em 0.5em;
+}
+
+table#league td:first-child {
+    text-align: left;
+    font-weight: bold;
+}
