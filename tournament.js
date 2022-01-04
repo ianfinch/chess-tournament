@@ -11,6 +11,55 @@ const callApi = slug => {
 };
 
 /**
+ * Get the overall information about the tournament
+ */
+const getTournamentInfo = tournament => {
+
+    return callApi("tournament/" + tournament)
+            .then(result => ({
+                tournament,
+                name: result.name,
+                advance: result.settings.user_advance_count,
+                gamesPerOpponent: result.settings.games_per_opponent,
+                currentRound: result.current_round,
+                startTime: result.start_time
+            }));
+};
+
+/**
+ * Add the rounds to the metadata
+ */
+const addRounds = data => {
+
+    if (!data.rounds) {
+        data.rounds = [];
+    }
+
+    const rounds = [];
+    for (let i = 1; i <= data.currentRound; i++) {
+        rounds.push(callApi("tournament/" + data.tournament + "/" + i));
+    }
+
+    return Promise.all(rounds)
+            .then(result => {
+                data.rounds = result;
+                return data;
+            });
+};
+
+/**
+ * Display the round's metadata
+ */
+const addTournamentHeading = data => {
+
+    const heading = document.createElement("h2");
+    heading.textContent = data.name;
+    document.getElementsByTagName("body")[0].appendChild(heading);
+
+    return data;
+};
+
+/**
  * Get the details of the group for the current round of the tournament
  */
 const getGroup = (tournament, round, group) => {
@@ -204,8 +253,17 @@ const addToDom = elem => {
  */
 window.addEventListener("load", () => {
 
-    getGroup(tournamentId, roundNumber, groupNumber)
-        .then(data => ({ result: null, input: data }))
+    getTournamentInfo(tournamentId)
+        .then(addTournamentHeading)
+        .then(addRounds)
+        .then(metadata => {
+            return getGroup(tournamentId, roundNumber, groupNumber)
+                    .then(groupInfo => ({
+                        metadata,
+                        input: groupInfo,
+                        result: null
+                    }));
+        })
         .then(createPlayerList)
         .then(addResults)
         .then(addPendingCount)
